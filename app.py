@@ -28,7 +28,7 @@ engine, get_db = init_db()
 def handle_message(data):
     print('Received message:', data)
     create_chat(get_db(), chat=data['message'], room_id=data['room_id'])
-    emit('message', data)
+    emit('message', data, to=data['room_id'])
 
 @socketio.on('join')
 def handle_join(data):
