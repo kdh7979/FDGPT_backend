@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>웹소켓 실시간 채팅</title>
+    <h1>Chatting</h1>
+</head>
+<body>
+    <form id="roomidForm">
+        <label for="chatroomID">채팅방 이름</label>
+        <input id="formRoomid" type="text" name="chatroomID" placeholder="chat1" required>
+        <button>채팅방 생성</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        document.querySelector('#roomidForm').onsubmit = () => {
+            var roomName = document.getElementById('formRoomid');
+            socket.emit('join', {'roomName' : roomName.value});
+            roomName.value = "";        // 필요?
+        };
+
+    </script>
+
+</body>
+</html>
