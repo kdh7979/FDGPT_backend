@@ -26,6 +26,20 @@ def create_chat(db: Session, chat: str, room_id:str):
     db.commit()
     return chat
 
-# def load_chat : DB에서 채팅 데이터 가져오기
-def load_chat(db: Session, room_id: int):
-    return db.query(Chat).filter(Chat.room_id == room_id).last().chat
+# def get_chat : DB에서 채팅 데이터 가져오기
+def get_chat(db: Session, room_id: int):
+    last_chat = db.query(Chat).filter(Chat.room_id == room_id).last()
+    if last_chat == None:
+        return
+    else:
+        return last_chat.chat
+
+
+# def get_room : DB에서 채팅방 아이디가 있는지 확인
+def get_room(db: Session, room_id: str):
+    room = db.query(ChatRoom).filter(ChatRoom.room_id == room_id).first()
+    if room==None:
+        print(f"{room_id} not found in db")
+        return False
+    else:
+        return room.room_id

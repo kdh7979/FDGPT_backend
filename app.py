@@ -1,12 +1,12 @@
-from flask import Flask, json, request, g, render_template, redirect, url_for
+from flask import Flask, json, request, g, render_template, redirect, url_for, flash
 
 from src.middleware.cors import cors
 from src.database.database import init_db
 from config import config
 
-from src.database.controller import create_chat, create_chat_room
+from src.database.controller import create_chat, create_chat_room, get_room, get_chat
 
-from flask_socketio import SocketIO, join_room, emit
+from flask_socketio import SocketIO, join_room, leave_room, emit
 
 import uuid
 
@@ -28,17 +28,31 @@ engine, get_db = init_db()
 def handle_message(data):
     print('Received message:', data)
     create_chat(get_db(), chat=data['message'], room_id=data['room_id'])
-    emit('message', data, to=data['room_id'])
+    emit('message', data, broadcast=True, to=data['room_id'])
+
+@socketio.on('createRoom')
+def handle_createRoom(data):
+    room_id = str(uuid.uuid4())
+    join_room(room_id)
+    create_chat_room(get_db(), room_id=room_id, room_name=data['roomName'])
+    print(f'room created: {room_id}')
+    emit('createdRoom', {'roomId' : room_id})
 
 @socketio.on('join')
 def handle_join(data):
-    room_id = str(uuid.uuid4())
-    print("received data to join:", data, room_id)
-    print(f"SID: {request.sid} is trying to join room {room_id}")
-    join_room(room_id)
-    create_chat_room(get_db(), room_id=room_id, room_name=data['roomName'])
-    return redirect(url_for("chatting", room_id=room_id))
+    room_id = data['roomId']
+    if get_room(get_db(), room_id) != False:
+        join_room(room_id)
+        emit('userJoined', {'room_id' : room_id, 'sid' : request.sid}, broadcast=True, to=room_id)
+    else:
+        emit('userFailedJoin')
+        return redirect(url_for('index.html'))
 
+@socketio.on('leave')
+def handle_leave(data):
+    room_id = data['roomId']
+    leave_room(room_id)
+    emit('userLeft', {'room_id' : room_id, 'sid' : request.sid}, broadcast=True, to=room_id)
 
 
 # 연결이 끊어질때 db close
@@ -54,7 +68,12 @@ def index():
 
 @app.route('/chat/<room_id>')
 def chatting(room_id):
-    return render_template('chat.html', room_id=room_id)
+    room_id = get_room(get_db(), room_id)
+    if room_id == False:
+        flash('존재하지 않는 채팅방입니다.', 'error')
+        return redirect(url_for('index'))
+    else:
+        return render_template('chat.html', room_id=room_id)
 
 @app.route('/status')
 def status():

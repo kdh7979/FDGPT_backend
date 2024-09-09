@@ -7,20 +7,64 @@
     <h1>Chatting</h1>
 </head>
 <body>
-    <form id="roomidForm">
-        <label for="chatroomID">채팅방 이름</label>
-        <input id="formRoomid" type="text" name="chatroomID" placeholder="chat1" required>
+    <!-- Message Flashing -->
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                <!-- error 메시지 -->
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form id="createRoomForm">
+        <label for="roomName">채팅방 이름</label>
+        <input id="formCreateRoom" type="text" name="roomName" placeholder="chat1" required>
         <button>채팅방 생성</button>
+    </form>
+
+    <form id="roomidForm"></form>
+        <label for="roomID">채팅방 ID</label>
+        <input id="formRoomId" type="text" name="roomID" placeholder="채팅방 ID" required>
+        <button>채팅방 입장</button>
     </form>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
     <script>
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        let socket = io.connect('http://' + document.domain + ':' + location.port);
 
-        document.querySelector('#roomidForm').onsubmit = () => {
-            var roomName = document.getElementById('formRoomid');
-            socket.emit('join', {'roomName' : roomName.value});
+        // 서버로 부터 채팅방 생성 완료 확인 -> 채팅 페이지로 이동
+        socket.on('createdRoom', (data) => {
+            console.log('redirecting')
+            loc = '/chat/' + data.roomId
+            window.location.href = loc
+        });
+
+        socket.on('userFailedJoin', (data) => {
+            if(data.sid == request.sid) {
+                window.location.href = '/chat/' + data.roomId
+            }
+        });
+
+        socket.on('joinRoomFailed', () => {
+            alert('room not found')
+        });
+
+        // 채팅방 생성 버튼 클릭
+        document.querySelector('#createRoomForm').onsubmit = () => {
+            let roomName = document.getElementById('formCreateRoom');
+            socket.emit('createRoom', {'roomName' : roomName.value});
             roomName.value = "";        // 필요?
+        };
+
+        // 채팅방 참가 버튼 클릭
+        document.querySelector('#roomidForm').onsubmit = () => {
+            let roomId = document.getElementById('formRoomId');
+            socket.emit('join', {'roomId' : roomId.value});
+            roomId.value = "";        // 필요?
         };
 
     </script>

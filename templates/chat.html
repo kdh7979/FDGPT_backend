@@ -22,28 +22,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
     <script>
         // 소켓 서버 연결
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        let socket = io.connect('http://' + document.domain + ':' + location.port);
     
         // 소켓 서버 이벤트 처리
         socket.on('message', (data) => {
-            var userName = document.getElementById('formUser');
-            var contentSpan = document.getElementById('message-container');
-            var content = document.createElement('div');
+            let userName = document.getElementById('formUser');
+            let contentSpan = document.getElementById('message-container');
+            let content = document.createElement('div');
             content.appendChild(document.createTextNode(data.user + " : " + data.message));
             contentSpan.appendChild(content);
         });
-    
+        
+        // 채팅방~이 생성되었습니다 메시지 서버로 보내기
+        socket.on('createdRoom', (data) => {
+            let contentSpan = document.getElementById('message-container');
+            let content = document.createElement('div');
+            content.appendChild(document.createTextNode("채팅방 : " + data.roomName + "이 생성되었습니다."));
+            contentSpan.appendChild(content);
+        });
+
+        // ~님이 입장하셨습니다 메시지 서버로 보내기
+        socket.on('userJoined', (data) => {
+            msg = request.sid + "님이 입장하셨습니다."
+            socket.emit('message', {'user': 'system', 'message' : msg})
+        });
+
+        // 채팅방 나가기
+        socket.on('userLeft', (data) => {
+            if(data.sid == request.sid) {
+                location.href = '/'
+            }
+            else {
+                msg = request.sid + "님이 퇴장하셨습니다."
+                socket.emit('message', {'user': 'system', 'message' : msg})
+            }
+
+        });
+
         // 전송 버튼을 누를 경우 유저 이름과 메시지 내용 소켓 서버로 전달
         document.querySelector('#messageForm').onsubmit = () => {
-            var userName = document.getElementById('formUser');
-            var userMessage = document.getElementById('formMessage');
+            let userName = document.getElementById('formUser');
+            let userMessage = document.getElementById('formMessage');
     
             let userInfo = userName.value;
             let messageInfo = userMessage.value;
-            let roomId = location.href.slice(location.href.lastIndexOf('/' + 1))
+            let roomId = location.href.slice(location.href.lastIndexOf('/') + 1)
     
             // 메시지 데이터 보내기
-            socket.emit('message', {'user': userInfo, 'message' : messageInfo, 'room_id' : roomId} );
+            socket.emit('message', {'user': userInfo, 'message' : messageInfo, 'roomId' : roomId} );
     
             // 메시지 입력 내용 초기화
             userMessage.value = "";
