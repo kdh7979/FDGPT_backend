@@ -36,8 +36,8 @@ def handle_join(data):
     join_room(unique_uid) # 2389dhwdbajhdawjd
     answer = get_next_conversation(model_id=room_id, conversation=[{"writer":unique_uid, "content":"안녕하세요."}])
     emit('receive_message', {'content': answer["content"], 'is_me': False}, to=unique_uid)
-    create_chat(get_db(), writer=unique_uid, content="안녕하세요.", room_id=room_id)
-    create_chat(get_db(), writer=room_id, content=answer["content"], room_id=room_id)
+    create_chat(get_db(), writer=unique_uid, content="안녕하세요.", room_id=unique_uid)
+    create_chat(get_db(), writer=room_id, content=answer["content"], room_id=unique_uid)
     session['room_id'] = room_id # 1 or 2
 
 @socketio.on('leave')
