@@ -19,6 +19,7 @@ class ChatRoom(Base):
 class Chat(Base):
     __tablename__ = "chat"
     id = Column(Integer, primary_key=True, index=True)
+    writer = Column(String)
     chat = Column(String)
     room_id = Column(String)
     created_at = Column(DateTime, server_default=current_timestamp())

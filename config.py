@@ -1,6 +1,11 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 class Config:
-    SECRET_KEY = 'aoheh43tgi439k0aeroi]lsde3fe'
-    DATABASE_URI = 'sqlite:///db.sqlite3'
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    DATABASE_URI = os.getenv('DATABASE_URI')
     
 
 config = Config()

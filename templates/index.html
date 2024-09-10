@@ -19,7 +19,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-
+    
     <form id="createRoomForm">
         <label for="roomName">채팅방 이름</label>
         <input id="formCreateRoom" type="text" name="roomName" placeholder="chat1" required>
@@ -41,6 +41,8 @@
             console.log('redirecting')
             loc = '/chat/' + data.roomId
             window.location.href = loc
+            msg = data.user + '님이 ' + data.roomName + '방을 만드셨습니다.'
+            emit('message', {'user' : 'system', 'message' : msg, 'roomId' : data.roomId})
         });
 
         socket.on('userFailedJoin', (data) => {
@@ -48,23 +50,18 @@
                 window.location.href = '/chat/' + data.roomId
             }
         });
-
-        socket.on('joinRoomFailed', () => {
-            alert('room not found')
-        });
-
         // 채팅방 생성 버튼 클릭
         document.querySelector('#createRoomForm').onsubmit = () => {
             let roomName = document.getElementById('formCreateRoom');
-            socket.emit('createRoom', {'roomName' : roomName.value});
-            roomName.value = "";        // 필요?
+            socket.emit('createRoom', {'roomName' : roomName.value, 'user' : 'testCreator'});
+            roomName.value = "";
         };
 
         // 채팅방 참가 버튼 클릭
         document.querySelector('#roomidForm').onsubmit = () => {
             let roomId = document.getElementById('formRoomId');
-            socket.emit('join', {'roomId' : roomId.value});
-            roomId.value = "";        // 필요?
+            socket.emit('join', {'roomId' : roomId.value, 'user' : 'test'});
+            roomId.value = "";
         };
 
     </script>
