@@ -1,4 +1,3 @@
-
 from flask import Flask, json, request, g, session
 
 from src.middleware.cors import cors
@@ -20,8 +19,7 @@ def init_app():
     cors.init_app(app)
 
     return app, socketio
-
-
+  
 app, socketio = init_app()
 engine, get_db = init_db()
 
@@ -110,7 +108,6 @@ def chat(opponent_id):
         }
     return json.dumps(res)
 
-
 @app.route('/api/item/<item_id>', methods=['GET'])
 def item_detail(item_id):
     item_id = int(item_id)
@@ -136,22 +133,6 @@ def item_detail(item_id):
             "chat_room_id": 2 # opponent_id랑 똑같음
         }
     return json.dumps(res)
-
-
-# @app.route('/')
-# def index():
-#     return render_template('index.html')
-
-# @app.route('/chat/<room_id>')
-# def chatting(room_id):
-#     room_id = get_room(get_db(), room_id)
-#     if room_id == "NO_ROOM":
-#         # flash('존재하지 않는 채팅방입니다.', 'error')
-#         return redirect(url_for('index'))
-#     else:
-#         chats = get_chat_all(get_db(), room_id=room_id)
-#         emit('chats', {'chats' : chats})
-#         return render_template('chat.html', room_id=room_id)
 
 @app.route('/status')
 def status():

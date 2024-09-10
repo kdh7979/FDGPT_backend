@@ -1,5 +1,5 @@
 .env
-.vscode/
-.conda/
-__pycache__/
+.vscode
+.conda
+__pycache__
 *.sqlite3
