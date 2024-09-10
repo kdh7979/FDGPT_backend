@@ -8,8 +8,6 @@ from src.database.database import engine
 
 Base = declarative_base()
 
-
-# class 명은 마음대로 바꿔도 됨
 class ChatRoom(Base):
     __tablename__ = "chat_rooms" # 여기에 테이블 이름
     id = Column(Integer, primary_key=True, index=True)
