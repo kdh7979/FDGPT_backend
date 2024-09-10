@@ -34,6 +34,10 @@ def handle_join(data):
     room_id = data['room_id']
     unique_uid = request.sid
     join_room(unique_uid) # 2389dhwdbajhdawjd
+    answer = get_next_conversation(model_id=room_id, conversation=[{"writer":unique_uid, "content":"안녕하세요."}])
+    emit('receive_message', {'content': answer["content"], 'is_me': False}, to=unique_uid)
+    create_chat(get_db(), writer=unique_uid, content="안녕하세요.", room_id=room_id)
+    create_chat(get_db(), writer=room_id, content=answer["content"], room_id=room_id)
     session['room_id'] = room_id # 1 or 2
 
 @socketio.on('leave')
@@ -55,7 +59,9 @@ def handle_message(data):
 
     n = get_chat_count(get_db(), unique_uid)
     if(n % 4) == 0 and n != 0:
-        get_fraud_detection(conversation=get_chat_n(4))
+        res = get_fraud_detection(conversation=get_chat_all(get_db(), unique_uid))
+        if res["is_fraud"] == True:
+            emit('alert', {"content": res["warning"]})
 
 @app.route('/api/items', methods=['GET'])
 def items():
@@ -83,7 +89,7 @@ def chat(opponent_id):
     opponent_id = int(opponent_id)
     if opponent_id == 1:
         res = {
-            "opponent_name": "멜룬멜룬1",
+            "opponent_name": "멜룬멜룬",
             "product_name": "맬론",
             "product_price": 100000,
             "chat" : [{
@@ -93,8 +99,8 @@ def chat(opponent_id):
         }
     elif opponent_id == 2:
         res = {
-            "opponent_name": "멜룬멜룬2",
-            "product_name": "맬론",
+            "opponent_name": "안아줘요",
+            "product_name": "안아줘요 인형",
             "product_price": 100000,
             "chat" : [{
                     "content": "안녕하세요.",
@@ -123,8 +129,8 @@ def item_detail(item_id):
             "location": "엘리아스",
             "timestamp": "1분 전",
             "price": 100000,
-            "writer": "멜룬멜룬",
-            "description": "불법 유통한 멜?루 입니다.\n불량한 멜룬 아닙니다.\n\n너무 멜룬멜룬 하지 않아 식용 가능 합니다. \n\n멜룬다고.",
+            "writer": "안아줘요",
+            "description": "부드라미 인형 안아줘요 안아줘욥 날다람쥐 중형인형 입니다\n새상품이고\n여러개 구매 가능합니다 1.8 > 1.6 가격내림\n\n제발안아줘요 인형도 있어요 1.6 여러개 있음 즉입시 개당 1.5씩\n\n!!! 부드라미 햄스터 인형 1.8 > 1.6씩 2개 있음\n\n반택+0.2 편택+0.35\n여러 개 구매 우대하지만 개별도 문의받습니다 ㅠ 2개 이상 구매시 절충가능합니다",
             "chat_room_id": 2 # opponent_id랑 똑같음
         }
     return json.dumps(res)
@@ -134,4 +140,5 @@ def status():
     return json.jsonify({'status': 'ok'})
 
 if __name__ == "__main__":
+    # socketio.run(app, "0.0.0.0", port=8081, debug=True, log_output=True)
     socketio.run(app, "0.0.0.0", port=8081, debug=True)
