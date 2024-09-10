@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from src.database.models import ChatRoom, Chat
+from src.database.models import Chat
 
 # def create_chat : 채팅 만들기
-def create_chat(db: Session, writer: str, chat: str, room_id:str):
-    chat = Chat(writer=writer, chat=chat, room_id=room_id)
-    db.add(chat)
+def create_chat(db: Session, writer: str, content: str, room_id:str):
+    content = Chat(writer=writer, content=content, room_id=room_id)
+    db.add(content)
     db.commit()
-    return chat
+    return content
 
 # def get_chat : DB에서 채팅 데이터 가져오기
 def get_chat_all(db: Session, room_id: str):
@@ -18,8 +18,7 @@ def get_chat_all(db: Session, room_id: str):
         for i in chats:
             res = {}
             res["writer"] = i.writer
-            res["chat"] = i.chat
-            res["time"] = i.created_at
+            res["content"] = i.content
             chat_data.append(res)   # chat_data: [{"writer":"who", "chat":"chat content", "time", "chatting 시각"}, {...}, ...]
         return chat_data
 
@@ -32,7 +31,7 @@ def get_chat_n(db: Session, room_id: str, n: int):
         for i in chats:
             res = {}
             res["writer"] = i.writer
-            res["chat"] = i.chat
+            res["content"] = i.content
             res["time"] = i.created_at
             chat_data.append(res)   # chat_data: [{"writer":"who", "chat":"chat content", "time", "chatting 시각"}, {...}, ...]
         return chat_data

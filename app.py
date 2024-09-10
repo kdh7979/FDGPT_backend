@@ -5,10 +5,9 @@ from src.database.database import init_db
 from config import config
 
 from src.database.controller import create_chat, get_chat_all, get_chat_count, get_chat_n
+from src.api.api import get_next_conversation, get_fraud_detection
 
 from flask_socketio import SocketIO, join_room, leave_room, emit
-
-import requests
 
 def init_app():
     app = Flask(__name__)
@@ -19,7 +18,7 @@ def init_app():
     cors.init_app(app)
 
     return app, socketio
-  
+
 app, socketio = init_app()
 engine, get_db = init_db()
 
@@ -47,20 +46,16 @@ def handle_leave(data):
 def handle_message(data):
     unique_uid = request.sid
     room_id = session['room_id']
-    create_chat(get_db(), writer=unique_uid, chat=data['content'], room_id=unique_uid)
+    create_chat(get_db(), writer=unique_uid, content=data['content'], room_id=unique_uid)
     emit('receive_message', {'content': data["content"], 'is_me': True}, to=unique_uid)
-    answer = requests.post('/api/inference/conversation', json={
-        "model_id": room_id,
-        "conversation": get_chat_all(get_db(), unique_uid) # 과거 대화 기록 다 가져와서 넣기
-    })
-    create_chat(get_db(), writer=room_id, chat=answer, room_id=unique_uid)
+    answer = get_next_conversation(model_id=room_id, conversation=json.dumps(get_chat_all(get_db(), unique_uid)))
+
+    create_chat(get_db(), writer=room_id, content=answer["content"], room_id=unique_uid)
     emit('receive_message', {'content': answer["content"], 'is_me': False}, to=unique_uid)
 
     n = get_chat_count(get_db(), unique_uid)
     if(n % 4) == 0 and n != 0:
-        answer = requests.post('/api/inference/fraud_detect', json={
-            "conversation" : get_chat_n(4)
-        })
+        get_fraud_detection(conversation=get_chat_n(4))
 
 @app.route('/api/items', methods=['GET'])
 def items():
