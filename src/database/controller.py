@@ -20,12 +20,33 @@ def create_chat_room(db: Session, room_id: str, room_name: str):
     return chat_room
 
 # def create_chat : 채팅 만들기
-def create_chat(db: Session, chat: str, room_id:str):
-    chat = Chat(chat=chat, room_id=room_id)
+def create_chat(db: Session, writer: str, chat: str, room_id:str):
+    chat = Chat(writer=writer, chat=chat, room_id=room_id)
     db.add(chat)
     db.commit()
     return chat
 
-# def load_chat : DB에서 채팅 데이터 가져오기
-def load_chat(db: Session, room_id: int):
-    return db.query(Chat).filter(Chat.room_id == room_id).last().chat
+# def get_chat : DB에서 채팅 데이터 가져오기
+def get_chat(db: Session, room_id: str):
+    chats = db.query(Chat).filter(Chat.room_id == room_id).all()
+    if chats == None:
+        return []
+    else:
+        chat_data = []
+        for i in chats:
+            res = {}
+            res["writer"] = i.writer
+            res["chat"] = i.chat
+            res["time"] = i.created_at
+            chat_data.append(res)   # chat_data: [{"writer":"who", "chat":"chat content", "time", "chatting 시각"}, {...}, ...]
+        return chat_data
+
+
+# def get_room : DB에서 채팅방 아이디가 있는지 확인
+def get_room(db: Session, room_id: str):
+    room = db.query(ChatRoom).filter(ChatRoom.room_id == room_id).first()
+    if room==None:
+        print(f"{room_id} not found in db")
+        return "NO_ROOM"
+    else:
+        return room_id
