@@ -37,7 +37,7 @@ def handle_join(data):
     room_id = data['room_id']
     unique_uid = request.sid
     join_room(unique_uid) # 2389dhwdbajhdawjd
-    session['room_id'] = room_id # 1, 2
+    session['room_id'] = room_id # 1 or 2
 
 @socketio.on('leave')
 def handle_leave(data):
@@ -58,7 +58,8 @@ def handle_message(data):
     create_chat(get_db(), writer=room_id, chat=answer, room_id=unique_uid)
     emit('receive_message', {'content': answer["content"], 'is_me': False}, to=unique_uid)
 
-    if(get_chat_count % 4) == 0:
+    n = get_chat_count(get_db(), unique_uid)
+    if(n % 4) == 0 and n != 0:
         answer = requests.post('/api/inference/fraud_detect', json={
             "conversation" : get_chat_n(4)
         })
