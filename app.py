@@ -91,7 +91,7 @@ def chat(opponent_id):
     if opponent_id == 1:
         res = {
             "opponent_name": "멜룬멜룬",
-            "product_name": "맬론",
+            "product_name": "불량 멜룬",
             "product_price": 100000,
             "chat" : [{
                     "content": "안녕하세요.",
@@ -116,10 +116,10 @@ def item_detail(item_id):
     res = {}
     if item_id == 1:
         res = {
-            "title": "멜론",
+            "title": "불량 멜룬",
             "location": "UNIST",
             "timestamp": "1분 전",
-            "price": 100000,
+            "price": 10000,
             "writer": "멜룬멜룬",
             "description": "불법 유통한 멜?루 입니다.\n불량한 멜룬 아닙니다.\n\n너무 멜룬멜룬 하지 않아 식용 가능 합니다. \n\n멜룬다고.",
             "chat_room_id": 1 # opponent_id랑 똑같음
@@ -127,9 +127,9 @@ def item_detail(item_id):
     elif item_id == 2:
         res = {
             "title": "안아줘요 인형",
-            "location": "엘리아스",
+            "location": "BEXCO",
             "timestamp": "1분 전",
-            "price": 100000,
+            "price": 16000,
             "writer": "안아줘요",
             "description": "부드라미 인형 안아줘요 안아줘욥 날다람쥐 중형인형 입니다\n새상품이고\n여러개 구매 가능합니다 1.8 > 1.6 가격내림\n\n제발안아줘요 인형도 있어요 1.6 여러개 있음 즉입시 개당 1.5씩\n\n!!! 부드라미 햄스터 인형 1.8 > 1.6씩 2개 있음\n\n반택+0.2 편택+0.35\n여러 개 구매 우대하지만 개별도 문의받습니다 ㅠ 2개 이상 구매시 절충가능합니다",
             "chat_room_id": 2 # opponent_id랑 똑같음
@@ -141,5 +141,4 @@ def status():
     return json.jsonify({'status': 'ok'})
 
 if __name__ == "__main__":
-    # socketio.run(app, "0.0.0.0", port=8081, debug=True, log_output=True)
     socketio.run(app, "0.0.0.0", port=8081, debug=True)

@@ -1,5 +1,5 @@
-import time
-import json
+# import time
+# import json
 import requests
 
 def get_next_conversation(model_id, conversation):
@@ -21,5 +21,5 @@ def get_fraud_detection(conversation):
     #     "is_fraud" : True,
     #     "warning" : "이 글은 사기일수도 있습니다?" # 경고 메세지
     # }
-    print("-------------------------", res.text)
+    # print("-------------------------", res.text)
     return res.json()
