@@ -11,7 +11,8 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 
 def init_app():
     app = Flask(__name__)
-    socketio = SocketIO(logger=True, engineio_logger=True, cors_allowed_origins="*")
+    # socketio = SocketIO(logger=True, engineio_logger=True, cors_allowed_origins="*")
+    socketio = SocketIO(cors_allowed_origins="*")
     socketio.init_app(app)
     app.config["SECRET_KEY"] = config.SECRET_KEY
 
@@ -52,13 +53,13 @@ def handle_message(data):
     room_id = session['room_id']
     create_chat(get_db(), writer=unique_uid, content=data['content'], room_id=unique_uid)
     emit('receive_message', {'content': data["content"], 'is_me': True}, to=unique_uid)
-    answer = get_next_conversation(model_id=room_id, conversation=json.dumps(get_chat_all(get_db(), unique_uid)))
-
+    answer = get_next_conversation(model_id=room_id, conversation=get_chat_all(get_db(), unique_uid))
+    
     create_chat(get_db(), writer=room_id, content=answer["content"], room_id=unique_uid)
     emit('receive_message', {'content': answer["content"], 'is_me': False}, to=unique_uid)
 
     n = get_chat_count(get_db(), unique_uid)
-    if(n % 4) == 0 and n != 0:
+    if(n % 2) == 0 and n != 0:
         res = get_fraud_detection(conversation=get_chat_all(get_db(), unique_uid))
         if res["is_fraud"] == True:
             emit('alert', {"content": res["warning"]})
